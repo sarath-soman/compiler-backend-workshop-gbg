@@ -77,5 +77,5 @@ export type RelationalExpression = BaseExpression & {
 export type LogicalExpression = BaseExpression & {
   leftExpression: Expression;
   rightExpression: Expression;
-  operator: Token.AND | Token.OR;
+  operator: Token.AND | Token.OR | Token.NOT;
 };

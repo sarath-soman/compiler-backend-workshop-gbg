@@ -1,4 +1,4 @@
-import { ArithmeticExpression, AssignmentExpression, BaseExpression, ConstantExpression, Expression, PrintExpression, VariableExpressionExpression } from "./ast"
+import { ArithmeticExpression, AssignmentExpression, BaseExpression, ConstantExpression, Expression, LogicalExpression, PrintExpression, RelationalExpression, VariableExpressionExpression } from "./ast"
 import { LexicalContext } from "./context"
 import { SymbolInfo } from "./symbol"
 
@@ -19,7 +19,11 @@ export function interpret(expression: Expression, context: LexicalContext): Symb
         case 'PrintExpression':
             return interpretPrintExpression(expression as PrintExpression, context)
         case 'AssignmentExpression':
-            return interpretAssignmentExpression(expression as AssignmentExpression, context)        
+            return interpretAssignmentExpression(expression as AssignmentExpression, context)   
+        case 'RelationalExpression':
+            return interpretRelationalExpression(expression as RelationalExpression, context)  
+        case 'LogicalExpression':
+            return interpretLogicalExpression(expression as LogicalExpression, context)   
     }
 
     throw new Error(`Unknown expression type ${expression.type}`)
@@ -67,7 +71,7 @@ function interpretVariableExpression(expression: VariableExpressionExpression, c
 
 function interpretPrintExpression(expression: PrintExpression, context: LexicalContext): SymbolInfo {
     const value = interpret(expression.expression, context)
-    console.log(value)
+    console.log(value.type === 'number' ? value.numberValue : value.type === 'boolean' ? value.booleanValue : 'unknown')
     return {
         type: 'number',        
     }
@@ -79,4 +83,62 @@ function interpretAssignmentExpression(expression: AssignmentExpression, context
     return {
         type: 'number',        
     }
+}
+
+function interpretRelationalExpression(expression: RelationalExpression, context: LexicalContext): SymbolInfo {
+    const leftValue = interpret(expression.leftExpression, context)
+    const rightValue = interpret(expression.rightExpression, context)
+    let result: boolean | undefined = undefined;
+    switch (expression.operator) {
+        case '<':
+            result = leftValue.numberValue! < rightValue.numberValue!
+            break
+        case '>':
+            result = leftValue.numberValue! > rightValue.numberValue!
+            break
+        case '<=':
+            result = leftValue.numberValue! <= rightValue.numberValue!
+            break
+        case '>=':
+            result = leftValue.numberValue! >= rightValue.numberValue!
+            break
+        case '==':
+            result = leftValue.numberValue === rightValue.numberValue
+            break
+    }
+
+    if (result !== undefined) {
+        return {
+            type: 'boolean',
+            booleanValue: result
+        }
+    }
+
+    throw new Error(`Unknown operator ${expression.operator}`)
+}
+
+function interpretLogicalExpression(expression: LogicalExpression, context: LexicalContext): SymbolInfo {
+    const leftValue = interpret(expression.leftExpression, context)
+    const rightValue = interpret(expression.rightExpression, context)
+    let result: boolean | undefined = undefined;
+    switch (expression.operator) {
+        case '&&':
+            result = leftValue.booleanValue! && rightValue.booleanValue!
+            break
+        case '||':
+            result = leftValue.booleanValue! || rightValue.booleanValue!
+            break
+        case '!':
+            result = !rightValue.booleanValue!
+            break
+    }
+
+    if (result !== undefined) {
+        return {
+            type: 'boolean',
+            booleanValue: result
+        }
+    }
+
+    throw new Error(`Unknown operator ${expression.operator}`)
 }

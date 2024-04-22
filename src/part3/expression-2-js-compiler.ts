@@ -3,7 +3,9 @@ import {
   AssignmentExpression,
   ConstantExpression,
   Expression,
+  LogicalExpression,
   PrintExpression,
+  RelationalExpression,
   VariableExpressionExpression,
 } from "./ast";
 
@@ -64,6 +66,16 @@ export function compileExpressionToJs(
         expression as AssignmentExpression,
         context
       );
+    case "RelationalExpression":
+      return compileRelationalExpressionToJs(
+        expression as RelationalExpression,
+        context
+      );
+    case "LogicalExpression":
+      return compileLogicalExpressionToJs(
+        expression as LogicalExpression,
+        context
+      );
   }
 
   throw new Error(`Unknown expression type ${expression.type}`);
@@ -122,4 +134,46 @@ function compileAssignmentExpressionToJs(
     expression.expression,
     context
   )}`;
+}
+
+function compileRelationalExpressionToJs(
+  expression: RelationalExpression,
+  context: Expression2JsCompilationContext
+): string {
+  const leftValue = compileExpressionToJs(expression.leftExpression, context);
+  const rightValue = compileExpressionToJs(expression.rightExpression, context);
+
+  switch (expression.operator) {
+    case "<":
+      return `(${leftValue} < ${rightValue})`;
+    case ">":
+      return `(${leftValue} > ${rightValue})`;
+    case "<=":
+      return `(${leftValue} <= ${rightValue})`;
+    case ">=":
+      return `(${leftValue} >= ${rightValue})`;
+    case "==":
+      return `(${leftValue} === ${rightValue})`;
+  }
+
+  throw new Error(`Unknown operator ${expression.operator}`);
+}
+
+function compileLogicalExpressionToJs(
+  expression: LogicalExpression,
+  context: Expression2JsCompilationContext
+): string {
+  const leftValue = compileExpressionToJs(expression.leftExpression, context);
+  const rightValue = compileExpressionToJs(expression.rightExpression, context);
+
+  switch (expression.operator) {
+    case "&&":
+      return `(${leftValue} && ${rightValue})`;
+    case "||":
+      return `(${leftValue} || ${rightValue})`;
+    case "!":
+      return `!(${rightValue})`;
+  }
+
+  throw new Error(`Unknown operator ${expression.operator}`);
 }

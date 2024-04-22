@@ -86,14 +86,13 @@ const logicalExpression: LogicalExpression = {
 const expressions: Expression[] = [printExpression, assignmentExpression, printExpression, relationalExpression, relationalExpression2, logicalExpression]
 console.log(JSON.stringify(printExpression, null, 2))
 
-const semanticValidationContext = new LexicalContext({symbolTable: {
+validateSemanticsOfExpressions(expressions, new LexicalContext({symbolTable: {
     a: {type: 'number'},
     b: {type: 'number'}
-}})
-validateSemanticsOfExpressions(expressions, semanticValidationContext);
-
-
-// const expression2JsCompilationContext = new Expression2JsCompilationContext();
-// const jsCode = compileExpressionsToJs(expressions, expression2JsCompilationContext)
-
-// console.log(jsCode)
+}}));
+interpretExpressions(expressions, new LexicalContext({symbolTable: {
+    a: {type: 'number', numberValue: 10},
+    b: {type: 'number', numberValue: 2}
+}}));
+const jsCode = compileExpressionsToJs(expressions, new Expression2JsCompilationContext())
+console.log(jsCode)
