@@ -1,0 +1,15 @@
+{
+  "name": "compiler-backend-101",
+  "version": "1.0.0",
+  "description": "A playground for teaching compiler backend basics",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "sarath.soman@gbgplc.com",
+  "license": "MIT",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
