@@ -3,6 +3,7 @@ import {
   AssignmentExpression,
   ConstantExpression,
   Expression,
+  IfExpression,
   LogicalExpression,
   PrintExpression,
   RelationalExpression,
@@ -61,7 +62,15 @@ export function validateSemantics(
         expression as LogicalExpression,
         lexicalContext
       );
+    
+    case "IfExpression":
+      return validateIfExpression(
+        expression as IfExpression,
+        lexicalContext
+      );
   }
+
+  throw new Error(`Unknown expression type ${expression.type}`);
 }
 
 function validateArithmeticExpression(
@@ -173,4 +182,24 @@ function validateLogicalExpression(
     return { type: "boolean" };
   }
   throw new Error("Logical expressions must have boolean operands");
+}
+
+function validateIfExpression(
+  expression: IfExpression,
+  lexicalContext: LexicalContext
+): SymbolInfo {
+  const conditionSymbolInfo = validateSemantics(
+    expression.condition,
+    lexicalContext
+  );
+  if (conditionSymbolInfo.type !== "boolean") {
+    throw new Error("If expressions must have boolean conditions");
+  }
+  expression.thenExpressions.forEach((thenExpression) => {
+    validateSemantics(thenExpression, lexicalContext);
+  });
+  expression.elseExpressions.forEach((elseExpression) => {
+    validateSemantics(elseExpression, lexicalContext);
+  });
+  return { type: "void" };
 }

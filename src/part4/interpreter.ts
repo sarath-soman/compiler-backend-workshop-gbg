@@ -1,4 +1,4 @@
-import { ArithmeticExpression, AssignmentExpression, BaseExpression, ConstantExpression, Expression, LogicalExpression, PrintExpression, RelationalExpression, VariableExpressionExpression } from "./ast"
+import { ArithmeticExpression, AssignmentExpression, BaseExpression, ConstantExpression, Expression, IfExpression, LogicalExpression, PrintExpression, RelationalExpression, VariableExpressionExpression } from "./ast"
 import { LexicalContext } from "./context"
 import { SymbolInfo } from "./symbol"
 
@@ -24,7 +24,10 @@ export function interpret(expression: Expression, context: LexicalContext): Symb
             return interpretRelationalExpression(expression as RelationalExpression, context)  
         case 'LogicalExpression':
             return interpretLogicalExpression(expression as LogicalExpression, context)   
+        case 'IfExpression':
+            return interpretIfExpression(expression as IfExpression, context)
     }
+    throw new Error(`Unknown expression type ${expression.type}`)
 }
 
 function interpretArithmeticExpression(expression: ArithmeticExpression, context: LexicalContext): SymbolInfo {
@@ -139,4 +142,16 @@ function interpretLogicalExpression(expression: LogicalExpression, context: Lexi
     }
 
     throw new Error(`Unknown operator ${expression.operator}`)
+}
+
+function interpretIfExpression(expression: IfExpression, context: LexicalContext): SymbolInfo {
+    const condition = interpret(expression.condition, context)
+    if (condition.booleanValue) {
+        interpretExpressions(expression.thenExpressions, context)
+    } else {
+        interpretExpressions(expression.elseExpressions, context)
+    }
+    return {
+        type: 'void'
+    }
 }

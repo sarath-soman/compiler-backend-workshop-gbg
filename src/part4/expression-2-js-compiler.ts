@@ -3,6 +3,7 @@ import {
   AssignmentExpression,
   ConstantExpression,
   Expression,
+  IfExpression,
   LogicalExpression,
   PrintExpression,
   RelationalExpression,
@@ -76,8 +77,11 @@ export function compileExpressionToJs(
         expression as LogicalExpression,
         context
       );
+    case "IfExpression":
+      return compileIfExpressionToJs(expression as IfExpression, context);
   }
-  
+
+  throw new Error(`Unknown expression type ${expression.type}`);
 }
 
 function compileArithmeticExpressionToJs(
@@ -175,4 +179,19 @@ function compileLogicalExpressionToJs(
   }
 
   throw new Error(`Unknown operator ${expression.operator}`);
+}
+
+function compileIfExpressionToJs(
+  expression: IfExpression,
+  context: Expression2JsCompilationContext
+): string {
+  const condition = compileExpressionToJs(expression.condition, context);
+  const thenBlock = compileExpressionsToJs(expression.thenExpressions, context);
+  const elseBlock = compileExpressionsToJs(expression.elseExpressions, context);
+
+  return `if (${condition}) {
+            ${thenBlock}
+          } else {
+            ${elseBlock}
+          }`;
 }

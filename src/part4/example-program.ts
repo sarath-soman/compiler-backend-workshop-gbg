@@ -1,87 +1,9 @@
-// a + b * 10 / 2
-// - precedence
-const expressionString = "a + (b * (10 / 2))"
-
-import { AssignmentExpression, Expression, IfExpression, LogicalExpression, PrintExpression, RelationalExpression, Token } from "./ast";
+import { Expression, IfExpression, LogicalExpression, PrintExpression, RelationalExpression, Token } from "./ast";
 import { LexicalContext } from "./context";
-import { compileExpressionsToJs, compileExpressionToJs, Expression2JsCompilationContext } from "./expression-2-js-compiler";
-import { interpret, interpretExpressions } from "./interpreter";
+import { compileExpressionsToJs, Expression2JsCompilationContext } from "./expression-2-js-compiler";
+import { interpretExpressions } from "./interpreter";
 import { validateSemanticsOfExpressions } from "./semantic-validator";
 
-const expression: Expression = {
-    type: 'ArithmeticExpression',
-    leftExpression: {
-        type: 'VariableExpression',
-        variableName: 'a'
-    },
-    operator: Token.PLUS,
-    rightExpression: {
-        type: 'ArithmeticExpression',
-        leftExpression: {
-            type: 'VariableExpression',
-            variableName: 'b'
-        },
-        operator: Token.MULTIPLY,
-        rightExpression: {
-            type: 'ArithmeticExpression',
-            leftExpression: {
-                type: 'ConstantExpression',
-                constant: 10
-            },
-            operator: Token.DIVIDE,
-            rightExpression: {
-                type: 'ConstantExpression',
-                constant: 2
-            }
-        }
-    },    
-}
-const printExpression: PrintExpression = {
-    type: 'PrintExpression',
-    expression
-}
-
-const assignmentExpression: AssignmentExpression = {
-    type: 'AssignmentExpression',
-    variableName: 'a',
-    expression: {
-        type: 'ConstantExpression',
-        constant: 50
-    }
-}
-
-const relationalExpression: RelationalExpression = {
-    type: 'RelationalExpression',
-    leftExpression: {
-        type: 'VariableExpression',
-        variableName: 'a'
-    },
-    operator: Token.LESS_THAN,
-    rightExpression: {
-        type: 'ConstantExpression',
-        constant: 100
-    }
-}
-
-const relationalExpression2: RelationalExpression = {
-    type: 'RelationalExpression',
-    leftExpression: {
-        type: 'VariableExpression',
-        variableName: 'a'
-    },
-    operator: Token.GREATER_THAN,
-    rightExpression: {
-        type: 'ConstantExpression',
-        constant: 10
-    }
-}
-
-const logicalExpression: LogicalExpression = {
-    type: 'LogicalExpression',
-    leftExpression: relationalExpression,
-    operator: Token.AND,
-    rightExpression: relationalExpression2
-}
 const printThen: PrintExpression = {
     type: 'PrintExpression',
     expression: {
@@ -97,23 +19,57 @@ const printElse: PrintExpression = {
         constant: 0
     }
 }
+
+const aGreaterThan10: RelationalExpression = {
+    type: 'RelationalExpression',
+    leftExpression: {
+        type: 'VariableExpression',
+        variableName: 'a'
+    },
+    operator: Token.GREATER_THAN,
+    rightExpression: {
+        type: 'ConstantExpression',
+        constant: 10
+    }
+}
+
+const bGreaterThan10: RelationalExpression = {
+    type: 'RelationalExpression',
+    leftExpression: {
+        type: 'VariableExpression',
+        variableName: 'b'
+    },
+    operator: Token.GREATER_THAN,
+    rightExpression: {
+        type: 'ConstantExpression',
+        constant: 10
+    }
+}
+
+const ifConditionExpression: LogicalExpression = {
+    type: 'LogicalExpression',
+    leftExpression: aGreaterThan10,
+    operator: Token.AND,
+    rightExpression: bGreaterThan10
+}
+
 const ifExpression: IfExpression = {
     type: 'IfExpression',
-    condition: logicalExpression,
+    condition: ifConditionExpression,
     thenExpressions: [printThen],
     elseExpressions: [printElse]
 }
 
-const expressions: Expression[] = [printExpression, assignmentExpression, printExpression, relationalExpression, relationalExpression2, logicalExpression, ifExpression]
-console.log(JSON.stringify(printExpression, null, 2))
+const expressions: Expression[] = [ifExpression]
+console.log(JSON.stringify(ifExpression, null, 2))
 
 validateSemanticsOfExpressions(expressions, new LexicalContext({symbolTable: {
     a: {type: 'number'},
     b: {type: 'number'}
 }}));
 interpretExpressions(expressions, new LexicalContext({symbolTable: {
-    a: {type: 'number', numberValue: 10},
-    b: {type: 'number', numberValue: 2}
+    a: {type: 'number', numberValue: 11},
+    b: {type: 'number', numberValue: 11}
 }}));
 const jsCode = compileExpressionsToJs(expressions, new Expression2JsCompilationContext())
 console.log(jsCode)
