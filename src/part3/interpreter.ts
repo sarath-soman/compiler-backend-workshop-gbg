@@ -25,8 +25,6 @@ export function interpret(expression: Expression, context: LexicalContext): Symb
         case 'LogicalExpression':
             return interpretLogicalExpression(expression as LogicalExpression, context)   
     }
-
-    throw new Error(`Unknown expression type ${expression.type}`)
 }
 
 function interpretArithmeticExpression(expression: ArithmeticExpression, context: LexicalContext): SymbolInfo {

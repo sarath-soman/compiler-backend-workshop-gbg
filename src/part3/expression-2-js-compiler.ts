@@ -77,8 +77,7 @@ export function compileExpressionToJs(
         context
       );
   }
-
-  throw new Error(`Unknown expression type ${expression.type}`);
+  
 }
 
 function compileArithmeticExpressionToJs(

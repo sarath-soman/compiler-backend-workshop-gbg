@@ -100,8 +100,11 @@ function validatePrintExpression(
   expression: PrintExpression,
   lexicalContext: LexicalContext
 ): SymbolInfo {
-  validateSemantics(expression.expression, lexicalContext);
-  return { type: "void" };
+  const value = validateSemantics(expression.expression, lexicalContext);
+  if (value.type === "number" || value.type === "boolean") {
+    return { type: "void" };
+  }
+  throw new Error("Print expressions must have number|boolean operands");
 }
 
 function validateAssignmentExpression(
